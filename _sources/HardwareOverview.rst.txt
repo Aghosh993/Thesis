@@ -24,7 +24,7 @@ As mentioned in prior sections, a quad-rotor UAV is an inherently unstable vehic
 IMU
 ^^^^^^^^^^^^^^^^
 
-TODO
+An Invensense MPU-9250 is used as the IMU (Inertial Measurement Unit). It combines a 3-axis gyroscope, accelerometer and magnetometer into an extremely small PCB-mounted package, and also includes internal 16-bit ADCs and analog frontends to perform the necessary downsampling, and signal conditioning.
 
 LIDAR Altimeter
 ^^^^^^^^^^^^^^^
