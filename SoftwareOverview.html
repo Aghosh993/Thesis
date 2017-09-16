@@ -1,0 +1,112 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Software overview &#8212; ag-thesis 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Hardware overview" href="HardwareOverview.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="software-overview">
+<h1>Software overview<a class="headerlink" href="#software-overview" title="Permalink to this headline">¶</a></h1>
+<p>Developing the software necessary for successful and safe command and control of a UAV demands a structured approach to software development and segmentation of tasks between the PFC and SFC. Additionally, the HMI (Human-machine interaction) aspect must be considered when deciding how exactly the ground station application will fit into the operational aspects of the UAV.</p>
+<p>As mentioned in the hardware overview, the primary task of the PFC is to run real-time inner-loop control algorithms that use inputs from sensors on the UAV to generate the 4 ESC actuator commands and stabilize the vehicle. To simplify development and improve efficiency, the firmware is written in the C programming language and the use of an operating system is omitted to reduce unnecessary overhead and code size. Instead, a “meta-operating system” is designed, in a sense, to provide some familiar operating system-like structures and development conventions while skipping some overhead that would normally be acceptable on a desktop but not on a deeply-embedded environment. As a reference, the POSIX system API (Application Programming Interface) was considered and used as a baseline in the development of much of the high-level system software running on the PFC. The POSIX API originated in early versions of the UNIX operating system, and has been worked on and with by numerous programmers to this day, culminating in its present-day use in the open-source Linux operating system and contemporary flavors of UNIX and other UNIX-like systems. It is also used in the Macintosh and Windows operating systems quite frequently.</p>
+<p>Adherence to the POSIX API (or to similar conventions) reduces developmental overhead and eases portability of flight software between C test harnesses written and run in simulation enviornments on Linux workstations, and the PFC. Quite often, it becomes possible to test, debug and validate a module on a Linux workstation where various debug utilities are available (such as the standard terminal I/O), and with almost no major software modifications port the application/module to the PFC’s flight software codebase where it can run in real-time. Additionally, a 3-tiered system of abstraction allows the flight software to be ported rapidly between various hardware platforms rapidly, while preserving behavior of the software and the low-level firmware modules.</p>
+<p>A major challenge in the development of the PFC’s flight software involves the ability of a user to debug and perform introspection into various critical parameters of the inner-loop control system. For example, it might be quite useful to be able to view sensor data and parameters in real-time, or inject a set of such values from the ground while the vehicle is airbourne to assist in characterization. It might be necessary to change control system gain parameters to improve stability while flying the UAV. It is also useful to have a core set of software tools with which to rapidly view and manipulate incoming data streams in realtime or post-flight, for better analysis of vehicle behavior. Thus, development of telemetry software is a critical step in being able to optimally operate the UAV and use it to its full potential as a research platform. It is here that the presence of the SFC becomes very important and useful. Traditionally, most UAVs with only one embedded flight computer rely on some kind of low-bitrate communications mechanism such as an IEEE 802.15.4 (commonly known by the ZigBee designation) module or other radio that acts as a transparent “bridge” for serial UART communications. A downside of such a system is its inherent bandwidth and range limitation (most of these modules only provide up to a mile of line-of-sight range, with price and power consumption rapidly increasing for modules with better range.) Most 802.15.4 modules realistically provide up to a few hundred Kbps of bandwidth in either direction, and quite often are half-duplex, which leads to major difficulty in implementing a real-time 2-way communications scheme. Also, streaming video over such a link is highly un-realistic.</p>
+<p>Based on these considerations, it was chosen to leverage the SFC in this project as a communications relay/proxy. A simple communications packet protocol (TRTP, or Trivial Robot Transfer Protocol) was developed that would be used in a wired serial UART communications link between the PFC and SFC. The two are connected together using an FTDI USB-Serial UART conversion IC. The wired serial UART allows for fairly high bandwidth (presently 460 Kbps, though rates up to 2 Mbps are possible) with full-duplex capability. Data encoded in TRTP consists of a “tag” or identifier string, a timestamp, and binary-encoded payload that can be either a set of N floating-point or integer numbers. Data in this format is sent from the PFC to the SFC over the wired link, where a small Python “proxy” application encapsulates each TRTP packet inside a UDP packet after performing a checksum verification step. The packets are then sent to an IP multicast group, which permits for efficient use of network bandwidth by allowing routers to be configured to forward individual telemetry packets to any endpoint that is “subscribed” to the stream. Of course, this use of multicasting is optimized for Ethernet and WiFi network where it is possible to configure IP Multicast forwarding rules. In the event that the network interface being used by the SFC is incapable of this, it is possible to change the proxy application to use unicast, or to configure a multicast “tunnel” to some endpoint where multicast is configured. This makes possible long-range backhaul operations where data can be sent from the UAV via satellite/4G links to a base station, where it can be re-converted to multicast and distributed to multiple recipients through the use of multicast subscriptions. In any event, UDP-encapsulated TRTP packets arrive at all configured endpoints on a IP network, where a client Python application can “see” or “peek at” all of the data stream in the multicast stream. The Python client application can then utilize a user-supplied “filter” to only show messages matching a specific string descriptor. Additionally, the raw telemetry stream can be easily logged using common network traffic analysis tools such as Wireshark, and analyzed post-flight.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ag-thesis</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Abstract.html">Abstract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HardwareOverview.html">Hardware overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Software overview</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="HardwareOverview.html" title="previous chapter">Hardware overview</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Abhimanyu Ghosh.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/SoftwareOverview.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

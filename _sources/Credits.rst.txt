@@ -1,0 +1,20 @@
+Credits
+========
+
+The writing of this thesis is the culmination of over 5 years of learning. It is a journey that has been full of surprises, wrong turns and frustrations, and ultimately enormous satisfaction seeing the fruits of my labor.
+
+There are several people without whom this experience would be impossible:
+
+- My parents, who put everything on the line to support me, and placed my interests above their own at all costs
+
+- My thesis advisor (Professor Farshad Khorrami) who has provided helpful insights throughout this journey
+
+- Professor Prashanth Krishnamurthy, who has always been there to answer my questions and provide his own insights and support whenever needed
+
+- My friends, who have helped me keep my sanity in the face of long hours and technical difficulties
+
+- All my professors who I've had the honor of working with throughout my career at NYU, who have all in some way made their contribution to the knowledge base I've applied in this project
+
+- My internship/co-op experiences which have provided invaluable insights into first-principles-driven approaches to engineering, and a wide array of relevant technical topics
+
+I am further indebted to any and all existing open-source projects as noted in this document, and hope that individuals looking to further the work described here similarly find my documentation helpful in their efforts.

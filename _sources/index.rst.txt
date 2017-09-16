@@ -7,10 +7,10 @@ Welcome to ag-thesis's documentation!
 =====================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
+   Credits
+   Abstract
+   HardwareOverview
+   SoftwareOverview
 
 Indices and tables
 ==================
